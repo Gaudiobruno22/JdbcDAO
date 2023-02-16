@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import br.com.model.dao.SellerDao;
 import br.com.model.entities.Department;
@@ -52,18 +55,8 @@ public class SellerDaoJDBC implements SellerDao{
 			rs = ps.executeQuery();
 			
 			if(rs.next()) {
-				Department dep = new Department();
-				dep.setId(rs.getInt("DepartmentId"));
-				dep.setName("DepName");
-				
-				Seller sel = new Seller();
-				sel.setId(rs.getInt("Id"));
-				sel.setName(rs.getString("Name"));
-				sel.setEmail(rs.getString("Email"));
-				sel.setBirthDate(rs.getDate("BirthDate"));
-				sel.setBaseSalary(rs.getDouble("BaseSalary"));
-				sel.setDepartment(dep);
-				
+				Department dep = instantiateDepartment(rs);
+				Seller sel = instantiateSeller(rs, dep);				
 				return sel;
 			}
 		}
@@ -73,9 +66,26 @@ public class SellerDaoJDBC implements SellerDao{
 		finally {
 			DB.closeStatement(ps);
 			DB.closeResultSet(rs);			
-		}
-		
+		}		
 		return null;
+	}
+
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller sel = new Seller();
+		sel.setId(rs.getInt("Id"));
+		sel.setName(rs.getString("Name"));
+		sel.setEmail(rs.getString("Email"));
+		sel.setBirthDate(rs.getDate("BirthDate"));
+		sel.setBaseSalary(rs.getDouble("BaseSalary"));
+		sel.setDepartment(dep);
+		return sel;
+	}
+
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName("DepName");
+		return dep;
 	}
 
 	@Override
@@ -84,4 +94,44 @@ public class SellerDaoJDBC implements SellerDao{
 		return null;
 	}
 
+	@Override
+	public List<Seller> findByDepartment(Department department) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			String sql = "SELECT seller.*,department.Name as DepName\r\n"
+					     + "FROM seller INNER JOIN department\r\n"
+					     + "ON seller.DepartmentId = department.Id\r\n"
+					     + "WHERE DepartmentId = ?\r\n"
+					     + "ORDER BY Name";
+			
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, department.getId());			
+			rs = ps.executeQuery();					
+			List<Seller> list = new ArrayList<>();
+			Map<Integer, Department> map = new HashMap<>();
+			
+			while(rs.next()) {			
+				Department dep = map.get(rs.getInt("DepartmentId"));
+				
+				//Para não gerar Dois Objetos de Departamento, Utilizo o Map para controlar e 
+				//Verificar se o Departamento Retornado já foi Instanciado ao menos uma Vez.
+				
+				if(dep == null) {
+					dep = instantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}				
+				Seller sel = instantiateSeller(rs, dep);
+				list.add(sel);
+			}
+			return list;
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+			DB.closeResultSet(rs);			
+		}		
+	}
 }
