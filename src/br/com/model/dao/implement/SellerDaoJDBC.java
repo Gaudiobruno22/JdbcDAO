@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import br.com.model.dao.SellerDao;
 import br.com.model.entities.Department;
@@ -66,15 +67,71 @@ public class SellerDaoJDBC implements SellerDao{
 	}
 
 	@Override
-	public void update(Seller obj) {
-		// TODO Auto-generated method stub
-		
+	public void update(Seller obj){
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			String sql = "UPDATE seller\r\n"
+					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ?\r\n"
+					+ "WHERE Id = ?";
+			ps = conn.prepareStatement(sql);
+			
+			ps.setString(1, obj.getName());
+			ps.setString(2, obj.getEmail());
+			ps.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			ps.setDouble(4, 1500.00);
+			ps.setInt(5, obj.getDepartment().getId());
+			ps.setInt(6, obj.getId());
+			
+			ps.executeUpdate();
+		}
+		catch(SQLException e){
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+			DB.closeResultSet(rs);
+		}	
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
 		
+		Scanner sc = new Scanner(System.in);
+		PreparedStatement ps = null;
+		try {
+			String sql = "DELETE FROM seller\r\n"
+					      + "WHERE Id = ?";
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
+			int rowsAffected = ps.executeUpdate();
+			
+		
+			while(rowsAffected == 0) {
+				System.out.println("ID Not Exists! Do you Want to Try Again? Digit 'Y' for yes, or 'N' for Exit Program.");
+				char choice = sc.next().toUpperCase().charAt(0);				
+				if(choice == 'Y') {					
+					System.out.println("Enter the Id who you want to Delete:");
+					id = sc.nextInt();
+					ps = conn.prepareStatement(sql);
+					ps.setInt(1, id);
+					rowsAffected = ps.executeUpdate();
+					if(rowsAffected > 0) {
+						System.out.println("Delete Completed.");
+					}
+				}
+				else {
+					System.out.println("Program Terminated");
+					return;
+				}
+			}
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+		}
 	}
 
 	@Override
@@ -104,24 +161,6 @@ public class SellerDaoJDBC implements SellerDao{
 			DB.closeResultSet(rs);			
 		}		
 		return null;
-	}
-
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-		Seller sel = new Seller();
-		sel.setId(rs.getInt("Id"));
-		sel.setName(rs.getString("Name"));
-		sel.setEmail(rs.getString("Email"));
-		sel.setBirthDate(rs.getDate("BirthDate"));
-		sel.setBaseSalary(rs.getDouble("BaseSalary"));
-		sel.setDepartment(dep);
-		return sel;
-	}
-
-	private Department instantiateDepartment(ResultSet rs) throws SQLException {
-		Department dep = new Department();
-		dep.setId(rs.getInt("DepartmentId"));
-		dep.setName("DepName");
-		return dep;
 	}
 
 	@Override
@@ -202,5 +241,22 @@ public class SellerDaoJDBC implements SellerDao{
 			DB.closeStatement(ps);
 			DB.closeResultSet(rs);			
 		}		
+	}
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller sel = new Seller();
+		sel.setId(rs.getInt("Id"));
+		sel.setName(rs.getString("Name"));
+		sel.setEmail(rs.getString("Email"));
+		sel.setBirthDate(rs.getDate("BirthDate"));
+		sel.setBaseSalary(rs.getDouble("BaseSalary"));
+		sel.setDepartment(dep);
+		return sel;
+	}
+
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName("DepName");
+		return dep;
 	}
 }
