@@ -28,7 +28,7 @@ public class Seller implements Serializable{
 		this.baseSalary = baseSalary;
 		this.department = department;
 	}
-
+	
 	public int getId() {
 		return id;
 	}
@@ -97,15 +97,15 @@ public class Seller implements Serializable{
 	@Override
 	public String toString() {
 		return "Class Seller: Id= " 
-				+ id + ", name= " 
+				+ id + ", Name = " 
 				+ name 
-				+ ", email= " 
+				+ ", Email = " 
 				+ email 
-				+ ", birthDate= " 
+				+ ", BirthDate = " 
 				+ birthDate 
-				+ ", baseSalary= "
+				+ ", BaseSalary = "
 				+ baseSalary 
-				+ ", department=" 
+				+ ", Department = " 
 				+ department;
 	}
 	

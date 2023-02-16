@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import db.DbException;
 public class SellerDaoJDBC implements SellerDao{
 	
 	private static Connection conn;
+	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	
 	public SellerDaoJDBC(Connection conn) {
 		this.conn = conn;
@@ -25,8 +28,41 @@ public class SellerDaoJDBC implements SellerDao{
 
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 		
+		try {
+			String sql = "INSERT INTO seller\r\n"
+					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId)\r\n"
+					+ "VALUES\r\n"
+					+ "(?, ?, ?, ?, ?)";
+			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			
+			ps.setString(1, obj.getName());
+			ps.setString(2, obj.getEmail());
+			ps.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			ps.setDouble(4, 1500.00);
+			ps.setInt(5, obj.getDepartment().getId());
+			
+			int rows = ps.executeUpdate();
+			if(rows > 0) {
+				 rs = ps.getGeneratedKeys();
+				 if(rs.next()) {
+					 int id = rs.getInt(1);
+					 obj.setId(id);
+				 }
+			}
+			else{
+				throw new DbException("Unexpected Error! 0 Rows Inserted.");
+			}			
+		}
+		catch(SQLException e){
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+			DB.closeResultSet(rs);
+		}		
 	}
 
 	@Override
@@ -90,8 +126,41 @@ public class SellerDaoJDBC implements SellerDao{
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			String sql = "SELECT seller.*,department.Name as DepName\r\n"
+					     + "FROM seller INNER JOIN department\r\n"
+					     + "ON seller.DepartmentId = department.Id\r\n"
+					     + "ORDER BY Name";
+			
+			ps = conn.prepareStatement(sql);			
+			rs = ps.executeQuery();					
+			List<Seller> list = new ArrayList<>();
+			Map<Integer, Department> map = new HashMap<>();
+			
+			while(rs.next()) {			
+				Department dep = map.get(rs.getInt("DepartmentId"));
+				
+				//Para não gerar Dois Objetos de Departamento, Utilizo o Map para controlar e 
+				//Verificar se o Departamento Retornado já foi Instanciado ao menos uma Vez.
+				
+				if(dep == null) {
+					dep = instantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}				
+				Seller sel = instantiateSeller(rs, dep);
+				list.add(sel);
+			}
+			return list;
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+			DB.closeResultSet(rs);			
+		}		
 	}
 
 	@Override

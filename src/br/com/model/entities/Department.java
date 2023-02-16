@@ -1,6 +1,7 @@
 package br.com.model.entities;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Objects;
 
 public class Department implements Serializable{
@@ -34,9 +35,10 @@ public class Department implements Serializable{
 		this.name = name;
 	}
 
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		return Objects.hash(id, name);
 	}
 
 	@Override
@@ -48,12 +50,12 @@ public class Department implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		Department other = (Department) obj;
-		return id == other.id;
+		return id == other.id && Objects.equals(name, other.name);
 	}
 
 	@Override
 	public String toString() {
-		return " Id= " + id + ", Name= " + name;
+		return "Class Department: Id = " + id + ", Name = " + name;
 	}
 	
 }
