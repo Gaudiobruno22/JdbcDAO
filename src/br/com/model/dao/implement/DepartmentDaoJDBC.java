@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import br.com.model.dao.DepartmentDao;
 import br.com.model.entities.Department;
@@ -16,6 +17,7 @@ import db.DbException;
 public class DepartmentDaoJDBC implements DepartmentDao{
 	
 	private Connection conn;
+	private static Scanner sc = new Scanner(System.in);
 	SellerDaoJDBC dep = new SellerDaoJDBC(conn);
 	
 	public DepartmentDaoJDBC(Connection conn) {
@@ -92,12 +94,25 @@ public class DepartmentDaoJDBC implements DepartmentDao{
 			String sql = "delete from department where id = ?";
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
-			int rows = ps.executeUpdate();
-			if(rows == 0) {
-				throw new DbException("Unexpected Error. No Rows Delected.");
-			}
-			else {
-				System.out.println("\nDelete Completed. " + rows + " Row Affected.");
+			int rowsAffected = ps.executeUpdate();
+			
+			while(rowsAffected == 0) {
+				System.out.println("ID Not Exists! Do you Want to Try Again? Digit 'Y' for yes, or 'N' for Exit Program.");
+				char choice = sc.next().toUpperCase().charAt(0);				
+				if(choice == 'Y') {					
+					System.out.println("Enter the Id who you want to Delete:");
+					id = sc.nextInt();
+					ps = conn.prepareStatement(sql);
+					ps.setInt(1, id);
+					rowsAffected = ps.executeUpdate();
+					if(rowsAffected > 0) {
+						System.out.println("Delete Completed.");
+					}
+				}
+				else {
+					System.out.println("Program Terminated");
+					return;
+				}
 			}
 		}
 		catch(SQLException e) {

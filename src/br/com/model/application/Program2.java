@@ -23,13 +23,13 @@ public class Program2 {
 		List<Department> list = depDao.findAll();
 		list.forEach(System.out::println);
 		
-		System.out.println("\n***** Test 3: Department Insert *****");
+		/*System.out.println("\n***** Test 3: Department Insert *****");
 		Department dep = new Department(1, "Casa de Massagem");
 		depDao.insert(dep);
-		System.out.println("Done. New Id On Database: " + dep.getId());
+		System.out.println("Done. New Id On Database: " + dep.getId());*/
 		
 		System.out.println("\n***** Test 4: Department Update *****");
-		Department dep2 = new Department(6, "Loja de Doido");
+		Department dep2 = new Department(9, "Loja de Doido");
 		depDao.update(dep2);
 		
 		System.out.println("\n***** Test 5: Department Delete *****");
