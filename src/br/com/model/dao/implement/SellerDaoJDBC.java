@@ -242,7 +242,7 @@ public class SellerDaoJDBC implements SellerDao{
 			DB.closeResultSet(rs);			
 		}		
 	}
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+	protected Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
 		Seller sel = new Seller();
 		sel.setId(rs.getInt("Id"));
 		sel.setName(rs.getString("Name"));
@@ -252,11 +252,11 @@ public class SellerDaoJDBC implements SellerDao{
 		sel.setDepartment(dep);
 		return sel;
 	}
-
-	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+	
+	protected Department instantiateDepartment(ResultSet rs) throws SQLException {
 		Department dep = new Department();
-		dep.setId(rs.getInt("DepartmentId"));
-		dep.setName("DepName");
+		dep.setId(rs.getInt("Id"));
+		dep.setName(rs.getString("Name"));
 		return dep;
 	}
 }
