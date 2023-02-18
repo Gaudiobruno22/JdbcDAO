@@ -55,14 +55,57 @@ public class DepartmentDaoJDBC implements DepartmentDao{
 
 	@Override
 	public void update(Department obj) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try{
+			String sql = "update department\r\n"
+					+ "   set Name = ?\r\n"
+					+ " where Id = ?";
+			
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, obj.getName());
+			ps.setInt(2, obj.getId());
+			int rows = ps.executeUpdate();
+			
+			if(rows ==0) {
+				throw new DbException("\nUnexpected Error. No Rows Affected!");	
+			}
+			else {
+				System.out.println("\nDone! Rows Affected: " + rows);
+			}
+		}
+		catch(SQLException e){
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+			DB.closeResultSet(rs);
+		}		
 	}
+	
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			String sql = "delete from department where id = ?";
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
+			int rows = ps.executeUpdate();
+			if(rows == 0) {
+				throw new DbException("Unexpected Error. No Rows Delected.");
+			}
+			else {
+				System.out.println("\nDelete Completed. " + rows + " Row Affected.");
+			}
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+		}
 	}
 
 	@Override
@@ -103,8 +146,6 @@ public class DepartmentDaoJDBC implements DepartmentDao{
 			List<Department> list = new ArrayList<>();
 			while(rs.next()) {
 				Department obj = getInstantiate(rs);
-				//obj.setId(rs.getInt("Id"));
-				//obj.setName(rs.getString("Name"));
 				list.add(obj);
 			}
 			return list;
