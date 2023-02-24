@@ -19,6 +19,7 @@ public class DepartmentDaoJDBC implements DepartmentDao{
 	private Connection conn;
 	private static Scanner sc = new Scanner(System.in);
 	SellerDaoJDBC dep = new SellerDaoJDBC(conn);
+	Department depa = new Department();
 	
 	public DepartmentDaoJDBC(Connection conn) {
 		this.conn = conn;
@@ -175,6 +176,6 @@ public class DepartmentDaoJDBC implements DepartmentDao{
 	}
 	
     private Department getInstantiate(ResultSet rs) throws SQLException{
-    	return dep.instantiateDepartment(rs);
+    	return depa.instantiateDepartment(rs);
     }
 }

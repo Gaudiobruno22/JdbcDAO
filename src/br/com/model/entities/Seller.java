@@ -1,6 +1,8 @@
 package br.com.model.entities;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
 
@@ -94,6 +96,17 @@ public class Seller implements Serializable{
 		return id == other.id;
 	}
 
+	public Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller sel = new Seller();
+		sel.setId(rs.getInt("Id"));
+		sel.setName(rs.getString("Name"));
+		sel.setEmail(rs.getString("Email"));
+		sel.setBirthDate(rs.getDate("BirthDate"));
+		sel.setBaseSalary(rs.getDouble("BaseSalary"));
+		sel.setDepartment(dep);
+		return sel;
+	}
+	
 	@Override
 	public String toString() {
 		return "Class Seller: Id= " 

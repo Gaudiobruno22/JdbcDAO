@@ -22,6 +22,8 @@ public class SellerDaoJDBC implements SellerDao{
 	
 	private static Connection conn;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	Department dep = new Department();
+	Seller sel = new Seller();
 	
 	public SellerDaoJDBC(Connection conn) {
 		this.conn = conn;
@@ -148,8 +150,8 @@ public class SellerDaoJDBC implements SellerDao{
 			rs = ps.executeQuery();
 			
 			if(rs.next()) {
-				Department dep = instantiateDepartment(rs);
-				Seller sel = instantiateSeller(rs, dep);				
+				dep.instantiateDepartment(rs);
+				sel.instantiateSeller(rs, dep);				
 				return sel;
 			}
 		}
@@ -185,10 +187,10 @@ public class SellerDaoJDBC implements SellerDao{
 				//Verificar se o Departamento Retornado já foi Instanciado ao menos uma Vez.
 				
 				if(dep == null) {
-					dep = instantiateDepartment(rs);
+					dep = dep.instantiateDepartment(rs);
 					map.put(rs.getInt("DepartmentId"), dep);
 				}				
-				Seller sel = instantiateSeller(rs, dep);
+				sel.instantiateSeller(rs, dep);
 				list.add(sel);
 			}
 			return list;
@@ -226,10 +228,10 @@ public class SellerDaoJDBC implements SellerDao{
 				//Verificar se o Departamento Retornado já foi Instanciado ao menos uma Vez.
 				
 				if(dep == null) {
-					dep = instantiateDepartment(rs);
+					dep = dep.instantiateDepartment(rs);
 					map.put(rs.getInt("DepartmentId"), dep);
 				}				
-				Seller sel = instantiateSeller(rs, dep);
+			    sel.instantiateSeller(rs, dep);
 				list.add(sel);
 			}
 			return list;
@@ -241,22 +243,5 @@ public class SellerDaoJDBC implements SellerDao{
 			DB.closeStatement(ps);
 			DB.closeResultSet(rs);			
 		}		
-	}
-	protected Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-		Seller sel = new Seller();
-		sel.setId(rs.getInt("Id"));
-		sel.setName(rs.getString("Name"));
-		sel.setEmail(rs.getString("Email"));
-		sel.setBirthDate(rs.getDate("BirthDate"));
-		sel.setBaseSalary(rs.getDouble("BaseSalary"));
-		sel.setDepartment(dep);
-		return sel;
-	}
-	
-	protected Department instantiateDepartment(ResultSet rs) throws SQLException {
-		Department dep = new Department();
-		dep.setId(rs.getInt("Id"));
-		dep.setName(rs.getString("Name"));
-		return dep;
 	}
 }

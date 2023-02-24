@@ -1,6 +1,8 @@
 package br.com.model.entities;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
 
@@ -51,6 +53,13 @@ public class Department implements Serializable{
 			return false;
 		Department other = (Department) obj;
 		return id == other.id && Objects.equals(name, other.name);
+	}
+	
+	public Department instantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("Id"));
+		dep.setName(rs.getString("Name"));
+		return dep;
 	}
 
 	@Override
